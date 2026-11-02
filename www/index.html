@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; media-src *; img-src 'self' data: content: blob: https: http:; connect-src * https: http:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="color-scheme" content="dark">
+    <title>Citizens Incident Reporter</title>
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="theme-black">
+    <!-- Notification Alert Banner (Top Floating Glass Banner) -->
+    <aside id="in-app-notification" class="notification-banner glass-panel" aria-live="assertive" role="alert">
+        <div class="notification-icon-wrap" id="notif-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+        <div class="notification-content">
+            <div class="notification-header">
+                <span class="notification-badge" id="notif-category">Incident Alert</span>
+                <span class="notification-time" id="notif-time">Just now</span>
+            </div>
+            <div class="notification-title" id="notif-title">New incident reported</div>
+        </div>
+        <button type="button" class="notification-close" id="btn-close-notif" aria-label="Dismiss">&times;</button>
+    </aside>
+
+    <!-- Top Liquid Glass App Bar -->
+    <header class="app-header glass-panel">
+        <div class="header-branding">
+            <div class="brand-text">
+                <h1 class="brand-title">CitizenWatch</h1>
+                <div class="brand-status">
+                    <span class="status-dot pulsing" id="sync-status-dot"></span>
+                    <span class="status-label" id="sync-status-text">Live Sync</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <!-- Profile / Account Button (Feature 8) -->
+            <button type="button" class="header-profile-btn" id="btn-open-profile" title="My Profile" aria-label="User Profile">
+                <div class="profile-avatar-chip" id="header-avatar-chip">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="header-avatar-icon">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="avatar-initials hidden" id="header-avatar-initials">CW</span>
+                </div>
+            </button>
+            
+            <button type="button" class="icon-btn" id="btn-refresh-feed" title="Refresh Feed" aria-label="Refresh Feed">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="refresh-icon">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Viewport -->
+    <main class="app-main-viewport">
+        
+        <!-- Feed View -->
+        <section id="view-feed" class="view-panel active" aria-label="Incident Feed View">
+            
+            <!-- Feed Scope Switcher -->
+            <div class="feed-tabs-wrapper">
+                <div class="feed-tabs-bar" role="tablist" aria-label="Feed Scope">
+                    <button type="button" class="feed-tab scope-tab active" id="tab-scope-community" role="tab" aria-selected="true" data-scope="community">
+                        <div class="tab-inner">
+                            <span class="tab-text">Community Feed</span>
+                            <span class="tab-active-bar"></span>
+                        </div>
+                    </button>
+                    <button type="button" class="feed-tab scope-tab" id="tab-scope-my" role="tab" aria-selected="false" data-scope="my">
+                        <div class="tab-inner">
+                            <span class="tab-text">My Reports</span>
+                            <span class="scope-badge" id="my-incidents-badge">0</span>
+                            <span class="tab-active-bar"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Incident Composer Prompt -->
+            <div class="quick-report-prompt" id="btn-quick-composer-prompt" role="button" tabindex="0">
+                <div class="composer-avatar" id="composer-user-avatar">CW</div>
+                <div class="composer-fake-input">What incident is happening?</div>
+                <div class="composer-icons">
+                    <span class="composer-icon" title="Add Photo">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </span>
+                    <span class="composer-icon" title="Attach GPS">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="10" r="3"/>
+                            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Category Filter Chips -->
+            <div class="category-filters-scroller">
+                <div class="filter-chips-track" id="category-chips-track">
+                    <button type="button" class="filter-chip active" data-category="All">
+                        <span class="chip-text">All</span>
+                        <span class="chip-count" id="count-all">0</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-category="Accident">
+                        <span class="chip-text">Accident</span>
+                        <span class="chip-count" id="count-accident">0</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-category="Fighting">
+                        <span class="chip-text">Fighting</span>
+                        <span class="chip-count" id="count-fighting">0</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-category="Rioting">
+                        <span class="chip-text">Rioting</span>
+                        <span class="chip-count" id="count-rioting">0</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-category="Robbery">
+                        <span class="chip-text">Robbery</span>
+                        <span class="chip-count" id="count-robbery">0</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-category="Other">
+                        <span class="chip-text">Other</span>
+                        <span class="chip-count" id="count-other">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar & Controls -->
+            <div class="feed-controls glass-panel">
+                <div class="search-input-wrap">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="feed-search-input" placeholder="Search incidents, places, reports..." autocomplete="off">
+                    <button type="button" id="btn-clear-search" class="clear-search-btn hidden" aria-label="Clear search">&times;</button>
+                </div>
+                <div class="feed-meta-row">
+                    <span class="feed-count-display" id="feed-status-summary">Showing 0 incidents</span>
+                    <span class="feed-polling-indicator" id="feed-last-updated">Updated: Just now</span>
+                </div>
+            </div>
+
+            <!-- Feed Incidents Card Stream -->
+            <div class="incidents-container" id="incidents-list"></div>
+
+            <!-- Empty State Component -->
+            <div id="feed-empty-state" class="empty-state-panel glass-panel hidden">
+                <div class="empty-icon-orb">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 class="empty-title" id="empty-state-title">No Incidents Reported</h3>
+                <p class="empty-subtitle" id="empty-state-desc">Your area has no active reports under this category.</p>
+                <button type="button" class="glass-action-btn" id="btn-empty-report">
+                    <span>Report First Incident</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Report Incident View -->
+        <section id="view-report" class="view-panel" aria-label="Report New Incident View">
+            <div class="form-container glass-panel">
+                <div class="form-header">
+                    <div class="form-title-badge">
+                        <span class="badge-text">Official Eyewitness Dispatch</span>
+                    </div>
+                    <h2 class="form-title">Report New Incident</h2>
+                    <p class="form-subtitle">Submit eyewitness information with verified GPS telemetry and photographic evidence. You can also make a post without having an account.</p>
+                </div>
+
+                <form id="incident-form" novalidate>
+                    <!-- Incident Title -->
+                    <div class="form-group">
+                        <label for="incident-title" class="form-label">
+                            Incident Title <span class="required-star">*</span>
+                        </label>
+                        <div class="input-glass-wrap">
+                            <input type="text" id="incident-title" name="title" class="glass-input" 
+                                   placeholder="e.g. 3-car accident blocking southbound lanes" required maxlength="120">
+                        </div>
+                    </div>
+
+                    <!-- Category Selector (Pills Grid) -->
+                    <div class="form-group">
+                        <label class="form-label">Category <span class="required-star">*</span></label>
+                        <div class="category-pills-selector" role="radiogroup" aria-label="Select Category">
+                            <button type="button" class="category-select-pill selected" data-value="Accident" role="radio" aria-checked="true">
+                                <span class="pill-title">Accident</span>
+                            </button>
+                            <button type="button" class="category-select-pill" data-value="Fighting" role="radio" aria-checked="false">
+                                <span class="pill-title">Fighting</span>
+                            </button>
+                            <button type="button" class="category-select-pill" data-value="Rioting" role="radio" aria-checked="false">
+                                <span class="pill-title">Rioting</span>
+                            </button>
+                            <button type="button" class="category-select-pill" data-value="Robbery" role="radio" aria-checked="false">
+                                <span class="pill-title">Robbery</span>
+                            </button>
+                            <button type="button" class="category-select-pill" data-value="Other" role="radio" aria-checked="false">
+                                <span class="pill-title">Other</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="incident-category-value" name="category" value="Accident">
+                    </div>
+
+                    <!-- Feature 7: Photographic Evidence Capture -->
+                    <div class="form-group photo-evidence-group">
+                        <label class="form-label">
+                            Incident Evidence (Photo)
+                            <span class="optional-badge">Evidence</span>
+                        </label>
+                        
+                        <!-- Dashed Liquid Glass Upload Box -->
+                        <div class="photo-dropzone glass-panel" id="photo-dropzone">
+                            <!-- Empty / Placeholder State -->
+                            <div class="photo-placeholder" id="photo-placeholder-wrap">
+                                <div class="camera-icon-orb">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <span class="photo-prompt-title">Attach Photographic Evidence</span>
+                                <span class="photo-prompt-subtitle">Tap to launch device camera or upload image</span>
+                                <div class="photo-action-buttons">
+                                    <button type="button" class="glass-btn small-btn" id="btn-snap-camera">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                            <circle cx="12" cy="13" r="4"></circle>
+                                        </svg>
+                                        <span>Camera</span>
+                                    </button>
+                                    <button type="button" class="glass-btn small-btn" id="btn-browse-photo">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                            <polyline points="21 15 16 10 5 21"></polyline>
+                                        </svg>
+                                        <span>Gallery</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Image Preview State -->
+                            <div class="photo-preview-container hidden" id="photo-preview-wrap">
+                                <div class="photo-preview-thumb-box">
+                                    <img src="" alt="Incident evidence preview" id="photo-preview-img" class="photo-thumbnail">
+                                </div>
+                                <div class="photo-overlay-actions">
+                                    <button type="button" class="photo-overlay-btn" id="btn-retake-photo" title="Retake Photo">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M23 4v6h-6"></path>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        <span>Retake</span>
+                                    </button>
+                                    <button type="button" class="photo-overlay-btn remove-btn" id="btn-remove-photo" title="Remove Photo">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        <span>Remove</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Desktop / Web Browser File Fallback -->
+                            <input type="file" id="incident-photo-file-fallback" accept="image/*" class="hidden" style="display: none !important;">
+                            <input type="hidden" id="incident-photo-base64" name="photo" value="">
+                        </div>
+                    </div>
+
+                    <!-- GPS Coordinate Grabber -->
+                    <div class="form-group gps-section">
+                        <div class="gps-header-row">
+                            <label class="form-label">GPS Geolocation <span class="required-star">*</span></label>
+                            <span class="gps-accuracy-badge" id="gps-accuracy-text">Coordinates required</span>
+                        </div>
+                        
+                        <div class="gps-interactive-card glass-panel">
+                            <div class="gps-readout-display" id="gps-readout-wrap">
+                                <div class="coord-box">
+                                    <span class="coord-label">LATITUDE</span>
+                                    <span class="coord-value" id="disp-latitude">--.------</span>
+                                </div>
+                                <div class="coord-divider"></div>
+                                <div class="coord-box">
+                                    <span class="coord-label">LONGITUDE</span>
+                                    <span class="coord-value" id="disp-longitude">--.------</span>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" id="incident-lat" name="latitude" value="">
+                            <input type="hidden" id="incident-lng" name="longitude" value="">
+
+                            <!-- Grab Button -->
+                            <button type="button" class="gps-grab-btn glass-btn" id="btn-grab-gps">
+                                <svg class="gps-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                                </svg>
+                                <span id="btn-gps-text">Acquire Device GPS Fix</span>
+                                <div class="radar-ping hidden" id="radar-ping-effect"></div>
+                            </button>
+
+                            <div class="gps-manual-toggle">
+                                <button type="button" class="link-btn" id="btn-toggle-manual-gps">Or manually enter coordinates</button>
+                            </div>
+
+                            <div class="manual-gps-row hidden" id="manual-gps-inputs">
+                                <div class="input-half">
+                                    <input type="number" step="any" id="manual-lat" class="glass-input small" placeholder="Lat (e.g. 37.7749)">
+                                </div>
+                                <div class="input-half">
+                                    <input type="number" step="any" id="manual-lng" class="glass-input small" placeholder="Lng (e.g. -122.4194)">
+                                </div>
+                                <button type="button" class="glass-btn small-btn" id="btn-apply-manual-gps">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Description -->
+                    <div class="form-group">
+                        <div class="label-with-counter">
+                            <label for="incident-description" class="form-label">
+                                Detailed Incident Description <span class="required-star">*</span>
+                            </label>
+                            <span class="char-counter" id="desc-char-counter">0 / 1000</span>
+                        </div>
+                        <div class="input-glass-wrap">
+                            <textarea id="incident-description" name="description" class="glass-textarea" rows="4" 
+                                      placeholder="Describe what occurred, vehicles involved, casualties, etc." 
+                                      maxlength="1000" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Urgency Level -->
+                    <div class="form-group">
+                        <label class="form-label">Urgency Level</label>
+                        <div class="urgency-row">
+                            <label class="urgency-opt">
+                                <input type="radio" name="urgency" value="Standard" checked>
+                                <span class="urgency-pill level-standard">Moderate</span>
+                            </label>
+                            <label class="urgency-opt">
+                                <input type="radio" name="urgency" value="High">
+                                <span class="urgency-pill level-high">High Alert</span>
+                            </label>
+                            <label class="urgency-opt">
+                                <input type="radio" name="urgency" value="Critical">
+                                <span class="urgency-pill level-critical">Emergency</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" class="submit-incident-btn" id="btn-submit-incident">
+                            <span class="btn-shine"></span>
+                            <span class="btn-text" id="submit-btn-text">Transmit Incident Report</span>
+                            <div class="btn-spinner hidden" id="submit-spinner"></div>
+                        </button>
+                    </div>
+
+                    <div id="form-feedback-msg" class="form-feedback hidden"></div>
+                </form>
+            </div>
+        </section>
+
+        <!-- User Profile & Authentication Modal -->
+        <div id="modal-profile" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="profile-heading">
+            <div class="modal-sheet glass-panel">
+                <div class="modal-header">
+                    <div class="modal-title-group">
+                        <h2 id="profile-heading" class="modal-title">Citizen Profile</h2>
+                        <span id="profile-subheading" class="modal-subtitle">Identity &amp; Incident Attribution</span>
+                    </div>
+                    <button type="button" class="modal-close-btn" id="btn-close-profile" aria-label="Close profile">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Logged-in State Card -->
+                    <div id="profile-logged-in-state" class="profile-card glass-panel hidden">
+                        <div class="profile-avatar-large" id="profile-avatar-large">JD</div>
+                        <h3 class="profile-name" id="profile-display-name">Jane Doe</h3>
+                        <span class="profile-handle" id="profile-handle">@janedoe</span>
+                        <div class="profile-stats-row">
+                            <div class="stat-box">
+                                <span class="stat-number" id="profile-stat-count">0</span>
+                                <span class="stat-label">My Reports</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number">Verified</span>
+                                <span class="stat-label">Status</span>
+                            </div>
+                        </div>
+                        <div class="profile-action-stack">
+                            <button type="button" class="glass-action-btn" id="btn-view-my-reports">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                <span>Filter My Reports in Feed</span>
+                            </button>
+                            <button type="button" class="logout-btn full-width" id="btn-sign-out">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Logged-out Auth State with Distinct Sign In & Register Pages -->
+                    <div id="profile-logged-out-state" class="auth-container">
+                        <!-- Top Segmented Page Switcher -->
+                        <div class="auth-segmented-switch" role="tablist" aria-label="Authentication Type">
+                            <button type="button" class="auth-segment-tab active" id="tab-auth-signin" role="tab" aria-selected="true">Sign In</button>
+                            <button type="button" class="auth-segment-tab" id="tab-auth-register" role="tab" aria-selected="false">Register</button>
+                        </div>
+
+                        <!-- PAGE 1: SIGN IN -->
+                        <div id="auth-page-signin" class="auth-page-view active">
+                            <div class="auth-banner">
+                                <h3 class="auth-page-heading">Welcome Back</h3>
+                                <p class="auth-desc">Sign in with your username and password to track and submit incident reports.</p>
+                            </div>
+
+                            <form id="auth-login-form">
+                                <div class="form-group">
+                                    <label for="auth-username" class="settings-label">Username</label>
+                                    <input type="text" id="auth-username" class="glass-input" placeholder="e.g. adebayo" required minlength="2" autocomplete="username">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="auth-password" class="settings-label">Password</label>
+                                    <input type="password" id="auth-password" class="glass-input" placeholder="Enter password (min 3 chars)" required minlength="3" autocomplete="current-password">
+                                </div>
+
+                                <button type="submit" class="save-settings-btn" id="btn-login-submit">
+                                    <span>Sign In</span>
+                                </button>
+                            </form>
+
+                            <div class="auth-switch-footer">
+                                <span>Don't have an account?</span>
+                                <button type="button" class="auth-switch-link" id="link-goto-register">Register here</button>
+                            </div>
+                        </div>
+
+                        <!-- PAGE 2: REGISTER -->
+                        <div id="auth-page-register" class="auth-page-view hidden">
+                            <div class="auth-banner">
+                                <h3 class="auth-page-heading">Create Citizen Account</h3>
+                                <p class="auth-desc">Join the CitizenWatch network to report incidents with verified GPS telemetry and photos.</p>
+                            </div>
+
+                            <form id="auth-register-form">
+                                <div class="form-group">
+                                    <label for="register-username" class="settings-label">Choose Username</label>
+                                    <input type="text" id="register-username" class="glass-input" placeholder="e.g. lagoswatcher" required minlength="2" autocomplete="username">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="register-password" class="settings-label">Password</label>
+                                    <input type="password" id="register-password" class="glass-input" placeholder="Create a password (min 3 chars)" required minlength="3" autocomplete="new-password">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="register-confirm-password" class="settings-label">Confirm Password</label>
+                                    <input type="password" id="register-confirm-password" class="glass-input" placeholder="Re-enter password" required minlength="3" autocomplete="new-password">
+                                </div>
+
+                                <button type="submit" class="save-settings-btn" id="btn-register-submit">
+                                    <span>Create Account</span>
+                                </button>
+                            </form>
+
+                            <div class="auth-switch-footer">
+                                <span>Already have an account?</span>
+                                <button type="button" class="auth-switch-link" id="link-goto-signin">Sign in here</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Detail Modal -->
+        <div id="modal-incident-detail" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+            <div class="modal-sheet glass-panel">
+                <div class="modal-header">
+                    <div id="detail-category-pill" class="category-pill pill-accident">Accident</div>
+                    <button type="button" class="modal-close-btn" id="btn-close-detail" aria-label="Close detail">&times;</button>
+                </div>
+                <div class="modal-body detail-body">
+                    <h2 id="detail-modal-title" class="detail-title">Incident Title</h2>
+                    <div class="detail-meta-row">
+                        <span id="detail-timestamp" class="detail-time">Time</span>
+                        <span id="detail-author" class="detail-author">Reported by Alex</span>
+                        <span id="detail-id-chip" class="detail-id">Report #0</span>
+                    </div>
+
+                    <!-- Photo Evidence in Details Modal (Feature 7) -->
+                    <div id="detail-photo-box" class="detail-photo-wrap glass-panel hidden">
+                        <img id="detail-photo-img" src="" alt="Incident evidence full view">
+                    </div>
+
+                    <div class="detail-desc-box glass-card">
+                        <p id="detail-description">Incident description goes here...</p>
+                    </div>
+                    <div class="detail-geo-box glass-panel">
+                        <div class="geo-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="10" r="3"/>
+                                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+                            </svg>
+                        </div>
+                        <div class="geo-text-wrap">
+                            <div class="geo-label">VERIFIED COORDINATES</div>
+                            <div id="detail-coords-text" class="geo-value">37.774900, -122.419400</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer detail-actions">
+                    <a id="detail-map-link" href="#" target="_system" class="glass-action-btn map-launch-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                            <line x1="9" y1="3" x2="9" y2="18"></line>
+                            <line x1="15" y1="6" x2="15" y2="21"></line>
+                        </svg>
+                        <span>Open in Maps</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Liquid Glass Navbar with Rounded Capsule Edges & Modern Icon Pack -->
+    <nav class="bottom-dock-nav glass-navbar" aria-label="Bottom Navigation">
+        <!-- Feed Tab -->
+        <button type="button" class="dock-tab active" data-target="view-feed" id="tab-nav-feed">
+            <div class="dock-tab-inner">
+                <svg class="dock-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+                    <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+                </svg>
+                <span class="tab-title">Incidents</span>
+            </div>
+        </button>
+
+        <!-- Center Report Action Tab (Elevated Capsule Pill) -->
+        <button type="button" class="dock-tab dock-action-report" data-target="view-report" id="tab-nav-report" aria-label="Report Incident">
+            <div class="dock-pill-action">
+                <svg class="dock-icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span class="action-tab-title">Report</span>
+            </div>
+        </button>
+
+        <!-- Settings Tab -->
+        <button type="button" class="dock-tab" data-target="modal-settings" id="tab-nav-settings">
+            <div class="dock-tab-inner">
+                <svg class="dock-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span class="tab-title">Settings</span>
+            </div>
+        </button>
+    </nav>
+
+    <!-- Cordova Script Bridge & App Modules -->
+    <script src="cordova.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

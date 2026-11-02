@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="org.citizens.incident" version="1.0.0" 
+        xmlns="http://www.w3.org/ns/widgets" 
+        xmlns:cdv="http://cordova.apache.org/ns/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>Citizens Incident Reporter</name>
+    <description>
+        A Citizens Incident Reporting Mobile App built with Apache Cordova, HTML5, CSS3, and JavaScript featuring photographic evidence capture, device GPS telemetry, user authentication, and a production FastAPI backend.
+    </description>
+    <author email="support@citizensincident.org" href="https://citizensincident.org">
+        Citizens Safety Initiative
+    </author>
+    
+    <content src="index.html" />
+
+    <!-- Network Access Rules & Whitelist -->
+    <access origin="*" />
+    <allow-navigation href="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <allow-intent href="market:*" />
+
+    <!-- Android Platform Preferences & Permissions -->
+    <platform name="android">
+        <preference name="StatusBarBackgroundColor" value="#0b0d10" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="StatusBarOverlaysWebView" value="false" />
+        <preference name="android-minSdkVersion" value="24" />
+        <preference name="android-targetSdkVersion" value="34" />
+        <preference name="DisallowOverscroll" value="true" />
+        <preference name="Orientation" value="portrait" />
+
+        <!-- Manifest Permissions for Geolocation, Camera, Notifications, and Storage -->
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            
+            <!-- Camera & Photographic Evidence Permissions (Feature 7) -->
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+            <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+            <uses-feature android:name="android.hardware.camera" android:required="false" />
+            <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+        </config-file>
+
+        <!-- Allow Cleartext Traffic -->
+        <edit-config target="AndroidManifest.xml" parent="/manifest/application" mode="merge">
+            <application android:usesCleartextTraffic="true" />
+        </edit-config>
+    </platform>
+
+    <!-- Plugins -->
+    <plugin name="cordova-plugin-camera" spec="^7.0.0" />
+    <plugin name="cordova-plugin-geolocation" spec="^5.0.0" />
+    <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
+    <plugin name="cordova-plugin-local-notification" spec="^1.2.3" />
+    <plugin name="cordova-plugin-device" spec="^3.0.0" />
+</widget>
